@@ -28,8 +28,12 @@ tasks.withType<AbstractArchiveTask>().configureEach {
 
   eachFile {
     permissions {
-      val isExec =
+      val isExec = try {
         Files.getPosixFilePermissions(file.toPath()).contains(PosixFilePermission.OWNER_EXECUTE)
+      } catch (e: UnsupportedOperationException) {
+        // Windows doesn't support POSIX permissions, default to non-executable
+        false
+      }
       unix(if (isExec) "755" else "644")
     }
   }
